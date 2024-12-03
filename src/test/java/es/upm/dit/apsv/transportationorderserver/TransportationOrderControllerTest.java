@@ -94,6 +94,67 @@ public class TransportationOrderControllerTest {
 
     }
 
+    @Test
+
+public void testGetOrder() throws Exception {
+
+     //call GET "/transportationorders/{truck}"  application/json
+     RequestBuilder request = MockMvcRequestBuilders
+
+     .get("/transportationorders/8962")
+
+     .accept(MediaType.APPLICATION_JSON);
+       
+
+     when(repository.findById("8962ZKR")).thenReturn(Optional.of(
+
+              new TransportationOrder("28","8962ZKR",1591682400000L,
+
+              40.4562191,-3.8707211,1591692196000L,42.0206372,-4.5330132,
+
+              0,0.0,0.0,0)));
+
+     // now write the rest of the test case...
+     MvcResult result = mockMvc.perform(request)
+
+                .andExpect(status().isOk())
+
+                .andReturn();
+
+
+}
+
+
+@Test
+
+public void testOrderFail() throws Exception {
+
+     //call GET "/transportationorders/{truck}"  application/json
+     RequestBuilder request = MockMvcRequestBuilders
+
+     .get("/transportationorders/7369")
+
+     .accept(MediaType.APPLICATION_JSON);
+       
+
+     when(repository.findById("8962ZKR")).thenReturn(Optional.of(
+
+              new TransportationOrder("28","8962ZKR",1591682400000L,
+
+              40.4562191,-3.8707211,1591692196000L,42.0206372,-4.5330132,
+
+              0,0.0,0.0,0)));
+
+     // now write the rest of the test case...
+     MvcResult result = mockMvc.perform(request)
+
+                .andExpect(status().is4xxClientError())
+
+                .andReturn();
+
+
+}
+
     private List<TransportationOrder> getAllTestOrders(){
 
         ObjectMapper objectMapper = new ObjectMapper();
