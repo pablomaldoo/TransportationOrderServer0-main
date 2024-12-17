@@ -54,140 +54,128 @@ import es.upm.dit.apsv.transportationorderserver.model.TransportationOrder;
 
 public class TransportationOrderControllerTest {
 
-    @InjectMocks
+  @InjectMocks
 
-    private TransportationOrderController business;
+  private TransportationOrderController business;
 
-    @MockBean
+  @MockBean
 
-    private TransportationOrderRepository repository;
+  private TransportationOrderRepository repository;
 
-    @Autowired
+  @Autowired
 
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    @Test
+  @Test
 
-    public void testGetOrders() throws Exception {
+  public void testGetOrders() throws Exception {
 
-        //call GET "/transportationorders"  application/json
+    // call GET "/transportationorders" application/json
 
-       
+    when(repository.findAll()).thenReturn(getAllTestOrders());
 
-        when(repository.findAll()).thenReturn(getAllTestOrders());
+    RequestBuilder request = MockMvcRequestBuilders
 
-        RequestBuilder request = MockMvcRequestBuilders
+        .get("/transportationorders")
 
-                .get("/transportationorders")
+        .accept(MediaType.APPLICATION_JSON);
 
-                .accept(MediaType.APPLICATION_JSON);
+    MvcResult result = mockMvc.perform(request)
 
-       
+        .andExpect(status().isOk())
 
-        MvcResult result = mockMvc.perform(request)
+        .andExpect(jsonPath("$", hasSize(20)))
 
-                .andExpect(status().isOk())
+        .andReturn();
 
-                .andExpect(jsonPath("$", hasSize(20)))
+  }
 
-                .andReturn();
+  @Test
+
+  public void testGetOrder() throws Exception {
+
+    // call GET "/transportationorders/{truck}" application/json
+    RequestBuilder request = MockMvcRequestBuilders
+
+        .get("/transportationorders/8962ZKR")
+
+        .accept(MediaType.APPLICATION_JSON);
+
+    when(repository.findById("8962ZKR")).thenReturn(Optional.of(
+
+        new TransportationOrder("28", "8962ZKR", 1591682400000L,
+
+            40.4562191, -3.8707211, 1591692196000L, 42.0206372, -4.5330132,
+
+            0, 0.0, 0.0, 0)));
+
+    // now write the rest of the test case...
+    MvcResult result = mockMvc.perform(request)
+
+        .andExpect(status().isOk())
+
+        .andReturn();
+
+  }
+
+  @Test
+
+  public void testOrderFail() throws Exception {
+
+    // call GET "/transportationorders/{truck}" application/json
+    RequestBuilder request = MockMvcRequestBuilders
+
+        .get("/transportationorders/7369")
+
+        .accept(MediaType.APPLICATION_JSON);
+
+    when(repository.findById("8962ZKR")).thenReturn(Optional.of(
+
+        new TransportationOrder("28", "8962ZKR", 1591682400000L,
+
+            40.4562191, -3.8707211, 1591692196000L, 42.0206372, -4.5330132,
+
+            0, 0.0, 0.0, 0)));
+
+    // now write the rest of the test case...
+    MvcResult result = mockMvc.perform(request)
+
+        .andExpect(status().is4xxClientError())
+
+        .andReturn();
+
+  }
+
+  private List<TransportationOrder> getAllTestOrders() {
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    ArrayList<TransportationOrder> orders =
+
+        new ArrayList<TransportationOrder>();
+
+    TransportationOrder order = null;
+
+    try (BufferedReader br = new BufferedReader(new FileReader(
+
+        new ClassPathResource("orders.json").getFile()))) {
+
+      for (String line; (line = br.readLine()) != null;) {
+
+        order = objectMapper.readValue(line, TransportationOrder.class);
+
+        orders.add(order);
+
+      }
+
+    } catch (IOException e) {
+
+      e.printStackTrace();
 
     }
 
-    @Test
+    return orders;
 
-public void testGetOrder() throws Exception {
-
-     //call GET "/transportationorders/{truck}"  application/json
-     RequestBuilder request = MockMvcRequestBuilders
-
-     .get("/transportationorders/8962ZKR")
-
-     .accept(MediaType.APPLICATION_JSON);
-       
-
-     when(repository.findById("8962ZKR")).thenReturn(Optional.of(
-
-              new TransportationOrder("28","8962ZKR",1591682400000L,
-
-              40.4562191,-3.8707211,1591692196000L,42.0206372,-4.5330132,
-
-              0,0.0,0.0,0)));
-
-     // now write the rest of the test case...
-     MvcResult result = mockMvc.perform(request)
-
-                .andExpect(status().isOk())
-
-                .andReturn();
-
+  }
 
 }
-
-
-@Test
-
-public void testOrderFail() throws Exception {
-
-     //call GET "/transportationorders/{truck}"  application/json
-     RequestBuilder request = MockMvcRequestBuilders
-
-     .get("/transportationorders/7369")
-
-     .accept(MediaType.APPLICATION_JSON);
-       
-
-     when(repository.findById("8962ZKR")).thenReturn(Optional.of(
-
-              new TransportationOrder("28","8962ZKR",1591682400000L,
-
-              40.4562191,-3.8707211,1591692196000L,42.0206372,-4.5330132,
-
-              0,0.0,0.0,0)));
-
-     // now write the rest of the test case...
-     MvcResult result = mockMvc.perform(request)
-
-                .andExpect(status().is4xxClientError())
-
-                .andReturn();
-
-
-}
-
-    private List<TransportationOrder> getAllTestOrders(){
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        ArrayList<TransportationOrder> orders =
-
-               new ArrayList<TransportationOrder>();
-
-        TransportationOrder order = null;
-
-       
-
-        try(BufferedReader br = new BufferedReader(new FileReader(
-
-                        new ClassPathResource("orders.json").getFile()))) {
-
-            for(String line; (line = br.readLine()) != null; ) {
-
-              order = objectMapper.readValue(line, TransportationOrder.class);
-
-              orders.add(order);
-
-            }
-
-          } catch (IOException e) {
-
-                e.printStackTrace();
-
-        }
-
-         return orders;
-
-       }
-
-}
-
